@@ -1,0 +1,8 @@
+---
+manifest_version: "1"
+name: fastwoke-core
+description: Reverse Debt Edition
+roles:
+  - name: loan_core
+    dna:
+      bundled: ../dnas/loan_core.dna

@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "express": "^5.2.1",
+    "nanocurrency-web": "^1.4.3",
+    "nostr-tools": "^2.19.4",
+    "shamirs-secret-sharing": "^2.0.1",
+    "websocket": "^1.0.35",
+    "ws": "^8.18.3"
+  }
+}

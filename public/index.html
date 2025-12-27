@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FastWoke Protocol (Alpha)</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        input {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: white;
+            padding: 8px;
+            width: 90%;
+            font-family: monospace;
+            margin-top: 5px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #8b949e;
+        }
+
+        .highlight {
+            color: #f2cc60;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success {
+            color: #56ff69;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🌑 FastWoke: Reverse Debt Console</h1>
+
+    <div class="card">
+        <h2>1. Creditor Zone (เจ้าหนี้)</h2>
+        <p>สร้างสัญญาและล็อกเงิน Nano (Escrow)</p>
+        <button onclick="createJob()">⚡ Create Job Contract</button>
+
+        <div id="result-create" class="hidden">
+            <label>Job Address (โอน Nano เข้าที่นี่):</label>
+            <input type="text" id="job-address" readonly class="highlight">
+
+            <label>🔑 My Share (เก็บไว้เอง):</label>
+            <input type="text" id="share-creditor" readonly>
+
+            <label>📨 Debtor Share (ส่งให้ลูกหนี้):</label>
+            <input type="text" id="share-debtor" readonly>
+            <p style="font-size: 12px; color: #ff7b72;">*หมายเหตุ: ในของจริง Debtor Share จะถูกเข้ารหัสก่อนส่ง</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>2. Debtor Zone (ลูกหนี้)</h2>
+        <p>เมื่อเจ้าหนี้กด Approve ให้นำกุญแจทั้ง 2 ส่วนมารวมกันเพื่อเบิกเงิน</p>
+
+        <label>Share A (จากเจ้าหนี้):</label>
+        <input type="text" id="input-share-a" placeholder="วาง My Share จากข้างบน...">
+
+        <label>Share B (ของตัวเอง):</label>
+        <input type="text" id="input-share-b" placeholder="วาง Debtor Share จากข้างบน...">
+
+        <br><br>
+        <button onclick="unlockFunds()">🔓 Unlock & Claim Funds</button>
+
+        <div id="result-unlock" class="hidden">
+            <p id="unlock-msg"></p>
+            <label>Recovered Seed (กู้คืนสำเร็จ):</label>
+            <input type="text" id="recovered-seed" readonly class="success">
+        </div>
+    </div>
+
+    <script>
+        async function createJob() {
+            const res = await fetch('/api/create-job', { method: 'POST' });
+            const data = await res.json();
+
+            document.getElementById('job-address').value = data.address;
+            document.getElementById('share-creditor').value = data.shareCreditor;
+            document.getElementById('share-debtor').value = data.shareDebtor;
+            document.getElementById('result-create').classList.remove('hidden');
+        }
+
+        async function unlockFunds() {
+            const shareA = document.getElementById('input-share-a').value;
+            const shareB = document.getElementById('input-share-b').value;
+
+            const res = await fetch('/api/unlock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shareA, shareB })
+            });
+            const data = await res.json();
+
+            const resultDiv = document.getElementById('result-unlock');
+            resultDiv.classList.remove('hidden');
+
+            if (data.success) {
+                document.getElementById('unlock-msg').innerHTML = "✅ SUCCESS! เงินพร้อมโอนเข้ากระเป๋าคุณแล้ว";
+                document.getElementById('unlock-msg').className = "success";
+                document.getElementById('recovered-seed').value = data.recoveredSeed;
+            } else {
+                document.getElementById('unlock-msg').innerText = "❌ FAILED: " + data.error;
+                document.getElementById('unlock-msg').style.color = "red";
+            }
+        }
+    </script>
+</body>
+
+</html>
